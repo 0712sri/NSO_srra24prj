@@ -31,22 +31,4 @@ install_dependencies() {
         sudo apt install -y software-properties-common > install.log
     fi
     pip3 install python-openstackclient argparse subprocess32 python-openstacksdk > install.log
-}
 
-# Function to set up permissions
-setup_permissions() {
-    chmod 777 scripts/operate.py
-}
-
-invoke_python_script() {
-    source $OPENRC
-    echo "sourced $OPENRC"
-    python3 scripts/operate.py $OPENRC $TAG $SSH_KEY || exit 1
-}
-
-# Main script execution
-install_dependencies
-setup_permissions
-invoke_python_script
-
-echo " operate phase complete"
