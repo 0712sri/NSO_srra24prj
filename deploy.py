@@ -51,3 +51,11 @@ def create_keypair(conn, keypair_name, private_key_path):
         print(f"{current_date_time} Keypair {keypair_name} already exists.")
     return keypair.id
 
+def setup_network(conn, tag_name, network_name, subnet_name, router_name, security_group_name):
+    # Create network
+    network = conn.network.find_network(network_name)
+    if not network:
+        network = conn.network.create_network(name=network_name)
+        print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Created network {network_name}.{network.id}")
+        network_id = network.id
+
