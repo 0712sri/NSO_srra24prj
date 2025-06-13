@@ -1,53 +1,101 @@
 #!/bin/bash
-#private key is to be given as 3rd argument.
+# Private key is to be given as 3rd argument
+
+# Enable strict mode for better error handling
+set -euo pipefail
+
 if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <openrc> <tag> <ssh_key>"
     exit 1
 fi
 
-OPENRC=$1
-TAG=$2
-SSH_KEY=$3
+OPENRC="$1"
+TAG="$2"
+SSH_KEY="$3"
+INSTALL_LOG="install.log"
 
+# Function to install dependencies with better logging and error handling
 install_dependencies() {
-    touch install.log
-    chmod 777 install.log
     echo "Checking and installing necessary dependencies..."
-    if ! command -v python3 &> install.log; then
-        sudo apt update > install.log
-        sudo apt install -y python3 > install.log
-    fi
-    if ! command -v pip3 &> install.log; then
-        sudo apt install -y python3-pip > install.log
-    fi
-    if ! command -v openstack &> install.log; then
-        sudo apt install -y python3-openstackclient > install.log
-    fi
-    if ! command -v ansible &> install.log; then
-        sudo add-apt-repository --yes --update ppa:ansible/ansible > install.log
-        sudo apt install -y ansible > install.log
-    fi
-    if ! dpkg-query -W -f='${Status}' software-properties-common 2>install.log | grep -q "ok installed"; then
-        sudo apt install -y software-properties-common > install.log
-    fi
-    pip3 install python-openstackclient argparse subprocess32 python-openstacksdk > install.log
+    echo "Installation logs will be written to $INSTALL_LOG"
+    
+    # Create empty log file with proper permissions
+    touch "$INSTALL_LOG"
+    chmod 644 "$INSTALL_LOG"
+    
+    # Package installation with better checks and logging
+    local packages=("python3" "python3-pip" "python3-openstackclient" "software-properties-common")
+    local ppa_packages=("ansible")
+    
+    # Update package list first
+    echo "Updating package lists..."
+    sudo apt update >> "$INSTALL_LOG" 2>&1
+    
+    # Install standard packages
+    for pkg in "${packages[@]}"; do
+        if ! dpkg -l | grep -q "^ii  $pkg "; then
+            echo "Installing $pkg..."
+            sudo apt install -y "$pkg" >> "$INSTALL_LOG" 2>&1
+        else
+            echo "$pkg is already installed."
+        fi
+    done
+    
+    # Install PPA packages
+    for pkg in "${ppa_packages[@]}"; do
+        if ! dpkg -l | grep -q "^ii  $pkg "; then
+            echo "Adding PPA and installing $pkg..."
+            sudo add-apt-repository --yes --update ppa:ansible/ansible >> "$INSTALL_LOG" 2>&1
+            sudo apt install -y "$pkg" >> "$INSTALL_LOG" 2>&1
+        else
+            echo "$pkg is already installed."
+        fi
+    done
+    
+    # Install Python packages
+    echo "Installing Python packages..."
+    pip3 install python-openstackclient python-openstacksdk >> "$INSTALL_LOG" 2>&1
+    
+    echo "Dependency installation complete."
 }
 
 # Function to set up permissions
 setup_permissions() {
-    chmod 777 scripts/operate.py
+    if [ -f "scripts/operate.py" ]; then
+        chmod 755 "scripts/operate.py"
+    else
+        echo "Error: scripts/operate.py not found!"
+        exit 1
+    fi
 }
 
+# Function to invoke Python script with error handling
 invoke_python_script() {
-    source $OPENRC
-    echo "sourced $OPENRC"
-    python3 scripts/operate.py $OPENRC $TAG $SSH_KEY || exit 1
+    if [ ! -f "$OPENRC" ]; then
+        echo "Error: OpenRC file $OPENRC not found!"
+        exit 1
+    fi
+    
+    if [ ! -f "$SSH_KEY" ]; then
+        echo "Error: SSH key file $SSH_KEY not found!"
+        exit 1
+    fi
+    
+    echo "Sourcing OpenRC file: $OPENRC"
+    source "$OPENRC"
+    
+    echo "Executing operate.py with parameters: $OPENRC $TAG $SSH_KEY"
+    python3 scripts/operate.py "$OPENRC" "$TAG" "$SSH_KEY"
 }
 
 # Main script execution
-install_dependencies
-setup_permissions
-invoke_python_script
+main() {
+    install_dependencies
+    setup_permissions
+    invoke_python_script
+    
+    echo "Operate phase completed successfully."
+}
 
-echo " operate phase complete"
-
+# Run main function
+main
