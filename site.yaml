@@ -16,7 +16,6 @@
         state: present
         update_cache: true
         
-      
     - name: Installing keepalived
       apt:
         name: keepalived
@@ -38,7 +37,7 @@
 
     - name: copy files haproxy.cfg
       template:
-        src: ../configurations/haproxy.cfg.j2
+        src: haproxy.cfg.j2
         dest: "/etc/haproxy/haproxy.cfg"
       notify:
         - restart haproxy
@@ -52,7 +51,7 @@
 
     - name: copy nginx config files
       template:
-        src: ../configurations/nginx.conf.j2
+        src: nginx.conf.j2
         dest: "/etc/nginx/nginx.conf"
 
     - name: nginx start
@@ -62,7 +61,7 @@
 
     - name: copy snmpd config files
       template:
-        src: ../configurations/snmpd.conf.j2
+        src: snmpd.conf.j2
         dest: "/etc/snmp/snmpd.conf"
 
     - name: snmpd start
@@ -72,7 +71,7 @@
 
     - name: Set virtual IPs
       set_fact:
-        virtual_ips: "{{ lookup('file', '../vip_address') | regex_findall('([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+        virtual_ips: "{{ lookup('file', 'vip_address') | regex_findall('([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
     - name: Set node state and priority
       set_fact:
@@ -158,7 +157,7 @@
 
     - name: copy service.py to devservers
       template:
-        src: "../configurations/service.py"
+        src: "service.py"
         dest: "/home/flask-app/app.py"
 
     - name: start flask app
@@ -173,7 +172,7 @@
     
     - name: copy snmpd conf file
       template:
-        src: ../configurations/snmpd.conf.j2
+        src: snmpd.conf.j2
         dest: "/etc/snmp/snmpd.conf"
 
     - name: run snmpd
