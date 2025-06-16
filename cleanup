@@ -35,14 +35,14 @@ install_dependencies() {
 
 # Function to set up permissions
 setup_permissions() {
-    chmod 777 scripts/cleanup.py
+    chmod 777 cleanup.py
 }
 
 # Function to invoke the Python script
 invoke_python_script() {
     source $OPENRC
     echo "sourced $OPENRC"
-    python3 scripts/cleanup.py $OPENRC $TAG || exit 1
+    python3 cleanup.py $OPENRC $TAG || exit 1
 }
 # Main script execution
 install_dependencies

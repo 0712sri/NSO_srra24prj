@@ -1,4 +1,4 @@
-- name: Configuring HAproxy loadbalancer
+- name: configuring HAproxy loadbalancer
   hosts: main_proxy standby_proxy devservers
   gather_facts: true
   pre_tasks:
@@ -6,7 +6,7 @@
       setup:
       delegate_facts: true
 
-- name: Configuring HAproxy loadbalancer
+- name: configuring HAproxy loadbalancer
   hosts: main_proxy standby_proxy
   become: true
   tasks:
@@ -51,18 +51,18 @@
 
     - name: copy nginx config files
       template:
-        src: nginx.conf.j2
-        dest: "/etc/nginx/nginx.conf"
+        src: nginx.cfg.j2
+        dest: "/etc/nginx/nginx.cfg"
 
     - name: nginx start
       service:
         name: nginx
         state: restarted
 
-    - name: copy snmpd config files
+    - name: copy snmpd cfg files
       template:
-        src: snmpd.conf.j2
-        dest: "/etc/snmp/snmpd.conf"
+        src: snmpd.cfg.j2
+        dest: "/etc/snmp/snmpd.cfg"
 
     - name: snmpd start
       service:
@@ -97,7 +97,7 @@
                   {{ virtual_ip }}
               }
           }
-        dest: /etc/keepalived/keepalived.conf
+        dest: /etc/keepalived/keepalived.cfg
       vars:
         virtual_ip: "{{ virtual_ips[0] }}"
       notify:
@@ -170,10 +170,10 @@
         name: snmpd
         state: present
     
-    - name: copy snmpd conf file
+    - name: copy snmpd cfg file
       template:
-        src: snmpd.conf.j2
-        dest: "/etc/snmp/snmpd.conf"
+        src: snmpd.cfg.j2
+        dest: "/etc/snmp/snmpd.cfg"
 
     - name: run snmpd
       service:

@@ -36,9 +36,9 @@ install_dependencies() {
 
 # Function to set up permissions
 setup_permissions() {
-    chmod 777 scripts/Deploy.py
-    chmod 777 scripts/gen_config.py
-    chmod 777 scripts/site.yaml
+    chmod 777 Deploy.py
+    chmod 777 config.py
+    chmod 777 site.yaml
     chmod 777 operate
     chmod 777 cleanup
 }
@@ -47,9 +47,9 @@ setup_permissions() {
  invoke_python_script() {
      source $OPENRC
      echo  "sourced $OPENRC"
-     python3 scripts/Deploy.py $OPENRC $TAG $SSH_KEY || exit 1
+     python3 Deploy.py $OPENRC $TAG $SSH_KEY || exit 1
      echo "executing next script"
-     python3 scripts/gen_config.py $TAG $SSH_KEY || exit 1
+     python3 config.py $TAG $SSH_KEY || exit 1
      echo "python script executed"
  }
 
@@ -101,7 +101,7 @@ ansible_playbook() {
     if [ $? -eq 0 ]; then
         echo "Ping successful to hosts."    
         echo "Executing ansible-playbook.."
-        ansible-playbook -i hosts scripts/site.yaml || exit 1
+        ansible-playbook -i hosts site.yaml || exit 1
     else
         echo "Ping not successful to hosts."
     fi

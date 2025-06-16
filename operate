@@ -35,13 +35,13 @@ install_dependencies() {
 
 # Function to set up permissions
 setup_permissions() {
-    chmod 777 scripts/operate.py
+    chmod 777 operate.py
 }
 
 invoke_python_script() {
     source $OPENRC
     echo "sourced $OPENRC"
-    python3 scripts/operate.py $OPENRC $TAG $SSH_KEY || exit 1
+    python3 operate.py $OPENRC $TAG $SSH_KEY || exit 1
 }
 
 # Main script execution
